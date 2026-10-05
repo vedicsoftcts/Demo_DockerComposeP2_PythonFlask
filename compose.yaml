@@ -1,0 +1,32 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - POSTGRES_DB=my_database
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret_password
+    volumes:
+      - .:/app
+    depends_on:
+      database:
+        condition: service_healthy
+
+  database:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=my_database
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d my_database"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
